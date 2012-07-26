@@ -2,8 +2,9 @@
  * $Id: 8211dump.cpp 10645 2007-01-18 02:22:39Z warmerdam $
  *
  * Project:  SDTS Translator
- * Purpose:  Dump 8211 file in verbose form - just a junk program. 
+ * Purpose:  Dump CATALOG.031 as XML. 
  * Author:   Frank Warmerdam, warmerdam@pobox.com
+ *           modified by Tore Halset
  *
  ******************************************************************************
  * Copyright (c) 1999, Frank Warmerdam
@@ -88,7 +89,8 @@ int main( int nArgc, char ** papszArgv )
     int         nMaxRepeat = 8;
     if( getenv("DDF_MAXDUMP") != NULL )
         nMaxRepeat = atoi(getenv("DDF_MAXDUMP"));
-
+    
+    printf("<CATALOG>\n");
 
     nStartLoc = VSIFTellL( oModule.GetFP() );
     for( poRecord = oModule.ReadRecord();
@@ -101,7 +103,12 @@ int main( int nArgc, char ** papszArgv )
              paoField = poRecord->GetField( i );
              
              DDFFieldDefn *poFieldDefn = paoField->GetFieldDefn();
-             printf("<%s>\n", poFieldDefn->GetName() );
+             
+             if(strcmp(poFieldDefn->GetName(), "0001") == 0) {
+                 continue;
+             }
+             
+             printf(" <%s>\n", poFieldDefn->GetName() );
 
              int iOffset = 0;
              
@@ -116,12 +123,8 @@ int main( int nArgc, char ** papszArgv )
                 {
                     int         nBytesConsumed;
                     
-                    printf(" <%s>", poFieldDefn->GetSubfield(sbfi)->GetName());
+                    printf("  <%s>", poFieldDefn->GetSubfield(sbfi)->GetName());
         
-                    /*
-                    poFieldDefn->GetSubfield(sbfi)->DumpData( paoField->GetData()+iOffset,
-                                                      paoField->GetDataSize() - iOffset, stdout );
-                    */
                     printf("%s", poFieldDefn->GetSubfield(sbfi)->ExtractStringData( paoField->GetData()+iOffset,
                                                       paoField->GetDataSize() - iOffset, NULL ));
                     
@@ -137,12 +140,14 @@ int main( int nArgc, char ** papszArgv )
 
              
              
-             printf("</%s>\n", poFieldDefn->GetName() );
+             printf(" </%s>\n", poFieldDefn->GetName() );
         }
 
         nStartLoc = VSIFTellL( oModule.GetFP() );
     }
 
+    printf("</CATALOG>\n");
+    
     oModule.Close();
     
 #ifdef DBMALLOC
