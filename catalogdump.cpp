@@ -107,8 +107,6 @@ int main( int nArgc, char ** papszArgv )
              if(strcmp(poFieldDefn->GetName(), "0001") == 0) {
                  continue;
              }
-             
-             printf(" <%s>\n", poFieldDefn->GetName() );
 
              int iOffset = 0;
              
@@ -118,6 +116,8 @@ int main( int nArgc, char ** papszArgv )
                 {
                     break;
                 }
+                
+                printf(" <%s>\n", poFieldDefn->GetName() );
                 
                 for( int sbfi = 0; sbfi < poFieldDefn->GetSubfieldCount(); sbfi++ )
                 {
@@ -136,11 +136,10 @@ int main( int nArgc, char ** papszArgv )
         
                     iOffset += nBytesConsumed;
                 }
+                
+                printf(" </%s>\n", poFieldDefn->GetName() );
             }
-
              
-             
-             printf(" </%s>\n", poFieldDefn->GetName() );
         }
 
         nStartLoc = VSIFTellL( oModule.GetFP() );
